@@ -1,0 +1,10 @@
+# backend/requirements.txt
+#Django
+django
+djangorestframework
+django-filter
+django-cors-headers
+#Extra
+uwsgi
+mysqlclient
+sqlalchemy

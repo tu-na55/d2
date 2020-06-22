@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+
+  #front:
+    #container_name: front
+    #build: ./front
+    #tty: true
+    #ports:
+     # - '3000:3000'
+    #volumes:
+      #- ./front/:/usr/src/app
+    # command: [sh, -c, "cd nuxt/ && npm run dev"]
+
+  backend:
+    container_name: backend
+    build: ./backend
+    tty: true
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./backend:/code
+    # command: python manage.py runserver 0.0.0.0:8000
