@@ -89,17 +89,6 @@ torch torchvision
 
 ___
 
-・nginx + uWSGI
-プロダクト利用では、Apache＋mod_python、または、Nginx＋uWSGI で動作させることが多い
-```bash
-80番ポート番号が解放されていない場合は、例えば下記の様にして開放する必要があります。
-yum -y install firewalld
-systemctl enable firewalld
-systemctl start firewalld
-firewall-cmd --add-port 80/tcp --permanent
-firewall-cmd --reload
-```
-
 ・drf-yasg(Swagger): API実装したはいいけど、ドキュメント作るのは面倒くさいし、動作確認するのにPostmanやcurlを使うのも面倒くさい、というときに便利なのがSwagger UIです。
 
 ・fastapi graphene uvicorn : FastAPI + graphQL

@@ -3,8 +3,7 @@ version: '3'
 services:
   db:
     container_name: mysql
-    image: mysql:latest
-    # image: mysql:8.0
+    image: mysql:8.0
     # image: mysql:5.7
     # build: .
     # build: ./mysql
@@ -14,11 +13,8 @@ services:
     # command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     # mysql:8.0
     # command: --default-authentication-plugin=mysql_native_password
-
-
     # add
-    # restart: always
-
+    restart: always
     ports:
       # mysql: 5.7
       # - "3306:3306"
@@ -27,7 +23,6 @@ services:
     # add
     expose:
       - 3306
-
     environment:
       MYSQL_ROOT_PASSWORD: rpass
       # sqlで作成するなら不要
@@ -36,7 +31,6 @@ services:
       # MYSQL_DATABASE: sample
       # MYSQL_HOSTNAME: mysql
       TZ: 'Asia/Tokyo'
-
     volumes:
       ##########
       # my.cnfの変更は down して up すれば反映されます。
@@ -50,7 +44,8 @@ services:
       # 永続化するときにマウントするdir
       # MySQLのコンテナを起動するたびに初期化処理が走るようになります。
       # - ./mysql/data:/var/lib/mysql
-      - d2.db.volume:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+      # - d2.db.volume:/var/lib/mysql
       # log
       - ./log/mysql:/var/log/mysql
 
@@ -89,6 +84,18 @@ services:
   #     - TZ=${TZ}
 
 ####################
+  # postgres:
+  #   image: postgres:12.1-alpine
+  #   container_name: django_postgres
+  #   restart: always
+  #   environment:
+  #     POSTGRES_DB: django
+  #     POSTGRES_USER: django
+  #     POSTGRES_PASSWORD: django
+  #     TZ: Asia/Tokyo
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+####################
   backend:
     container_name: django
     # build:
@@ -100,17 +107,19 @@ services:
 
     # 03 add
     # tty: true
-
     # command: ./wait-for-it.sh db:3306 -- pipenv run ./sample/manage.py runserver 0.0.0.0:8000
     # command: python3 manage.py runserver 0.0.0.0:8000
     # command: pysthon manage.py runserver 0.0.0.0:8000
     command: uwsgi --socket :8001 --module backend.wsgi --logto /tmp/uwsgi.log
+    # command: uwsgi --socket :8001 --module mysite.wsgi
+    # command: batch
+    restart: always
     ports:
       # - '8000:8000'
       # - '8080:8080'
       - '8001:8001'
-      expose:
-        - "8001"
+    expose:
+      - "8001"
     # environment:
       # 01 add
       #   - DJANGO_SECRET_KEY=secret_key
@@ -119,7 +128,23 @@ services:
       # DB_HOST: mysql
       # DB_HOST: db
       # DB_PORT: 3306
-
+    # environment:
+    #   TZ: Asia/Tokyo
+    #   ALLOWED_HOSTS: 'localhost, 127.0.0.1'
+      # DB_ENGINE: postgresql
+      # DB_HOST: django_postgres
+      # DB_NAME: django
+      # DB_USER: django
+      # DB_PASS: django
+      # EMAIL_BACKEND: smtp
+      # EMAIL_HOST: smtp.gmail.com
+      # EMAIL_PORT: 587
+      # EMAIL_USE_TLS: 'true'
+      # EMAIL_HOST_USER: ''
+      # EMAIL_HOST_PASSWORD: ''
+      # EMAIL_USE_LOCALTIME: 'false'
+      # DEFAULT_FROM_EMAIL: ''
+      # STATIC_ROOT: '/static'
     volumes:
       # ソースコードが格納されている/codeを/srcにマウントすることでコンテナ外からソースファイルを触れるようにしておきます。
         # - ./backend:/app
@@ -127,12 +152,20 @@ services:
       # - ./static:/static
       # 12
       # - sock:/var/run/uwsgi
-      # - static:/var/www/app/sample/static
-      # - ./log/python:/var/log/python
+      - static:/var/www/app/sample/static
+      - ./log/python:/var/log/python
+      # 16
+      # - ./Application/django-sample:/home/work/django-sample
+      # - ./log/django:/home/work/django
+      # - ./log/uwsgi:/home/work/uwsgi
     depends_on:
       - db
     # networks:
     #   - sample
+    # 16
+    # networks:
+    #   django-sample-network:
+    #     ipv4_address: 172.23.0.5
 ####################
 
 ####################
@@ -170,11 +203,21 @@ services:
   # 01
   server:
     container_name: nginx
-    image: nginx:latest
+    image: nginx:1.19
+    # image: steveltn/https-portal:1
     ports:
         # - "8000:8000"
         - "80:80"
         # - 8000:80
+        # - 443:443
+    ####################
+    # 17 add
+    restart: always
+    environment:
+      DOMAINS: 'localhost'
+      # STAGE: 'production'
+      TZ: Asia/Tokyo
+    ####################
     volumes:
         # - ./config/nginx:/etc/nginx/conf.d
         # 11
@@ -187,25 +230,34 @@ services:
         # - ./nginx/nginx.conf:/etc/nginx/nginx.conf
         # - ./nginx/conf.d:/etc/nginx/conf-sample.d
         # 15
-        - ./nginx/conf:/etc/nginx/conf.d
+        - ./nginx/app_nginx.conf:/etc/nginx/conf.d
         - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
-        # - ./static:/static
-        # - ./log/nginx:/var/log/nginx
+        - ./static:/static
+        - ./log/nginx:/var/log/nginx
+    # 17
+    # volumes:
+        # - django_statics:/var/www/vhosts/localhost/static:ro
+        # - ./nginx_uwsgi.ssl.conf.erb:/var/lib/nginx-conf/localhost.ssl.conf.erb:ro
+        # - ssl_certs:/var/lib/https-portal
     # app:
     #   image: php:7.4.0-fpm
     #   volumes:
     #     - ./php/src:/var/www/
     depends_on:
-        - django
-        # - nuxt
+        - backend
+        # - frontend
+    # 16
+    # networks:
+    #   django-sample-network:
+    #     ipv4_address: 172.23.0.4
   ####################
 
 # 永続化
 # データを永続的に保持しておくためにはローカルのディレクトリと同期する方法とdata volumeコンテナに保存する２つの方法があります。
 # "django.db.volume"というdata volumeを作成し同期させるようにしています。
-volumes:
-  d2.db.volume:
-    name: d2.db.volume
+# volumes:
+#   d2.db.volume:
+    # name: d2.db.volume
 # 04
 # volumes:
 #   mysite.db.volume:
@@ -230,6 +282,14 @@ volumes:
 #   driver: local
 # static:
 #   driver: local
+# 17
+volumes:
+  mysql_data:
+    driver: local
+  static:
+    driver: local
+  # ssl_certs:
+    # driver: local
 ####################
 # networks:
 #   sample_network:
@@ -240,3 +300,12 @@ volumes:
 # networks:
 #   db_network:
 #     driver: bridge
+# 16
+# networks:
+#   django-sample-network:
+#     driver: bridge
+#     ipam:
+#      driver: default
+#      config:
+#        - subnet: 172.23.0.0/24
+

@@ -183,15 +183,6 @@ django
 
 ```
 
-```bash
-# 参考
-・command: bash -c '複数行コマンド'  
-# 一行にまとめるコマンド
-・usermod -o -u 1000 mysql;
-・groupmod -o -g 500 mysql;
-・chown -R mysql:root /var/run/mysqld/;
-・/entrypoint.sh mysqld --user=mysql --console'
-```
 
 
 ##### git
@@ -245,8 +236,49 @@ git fetch
 git diff config/urls.py
 ```
 
-##### Docker
 
+・nginx + uWSGI
+プロダクト利用では、Apache＋mod_python、または、Nginx＋uWSGI で動作させることが多い
+```bash
+80番ポート番号が解放されていない場合は、例えば下記の様にして開放する必要があります。
+yum -y install firewalld
+systemctl enable firewalld
+systemctl start firewalld
+firewall-cmd --add-port 80/tcp --permanent
+firewall-cmd --reload
+```
+
+
+```bash
+# ポートの使用状況
+lsof -i:80
+
+
+netstat -nap
+netstat -na | grep ":80"
+# 占領箇所を特定したら、そのプロセスをkillする
+sudo kill 80
+
+
+```
+
+```bash
+# 参考
+・command: bash -c '複数行コマンド'  
+# 一行にまとめるコマンド
+・usermod -o -u 1000 mysql;
+・groupmod -o -g 500 mysql;
+・chown -R mysql:root /var/run/mysqld/;
+・/entrypoint.sh mysqld --user=mysql --console'
+```
+mounting \\\"/run/desktop/s/nuxt/d2/nginx/uwsgi_params\\\" to rootfs 
+\\\"/var/lib/docker/overlay2/75c4da340055da26e9/merged\\\" at 
+\\\"/var/lib/docker/overlay2/75c4da340055da26e9da3e4f955669d6a1fa24ddb489b7ms\\\" caused 
+\\\"not a directory\\\"\"": 
+unknown: Are you trying to mount a directory onted host path exists and is the expected type
+
+##### Docker
+docker-compose run python django-admin.py startproject mysite .
 ```bash
 wsl_update_x64.msi
 Docker Desktop Installer.exe

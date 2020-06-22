@@ -1,0 +1,35 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+flake8 = "*"
+mypy = "*"
+drf-yasg = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-django = "*"
+
+[packages]
+numpy = "*"
+matplotlib = "*"
+pandas = "*"
+django = "*"
+djangorestframework = "*"
+black = "*"
+django-filter = "*"
+django-cors-headers = "*"
+djangorestframework-simplejwt = "*"
+djoser = "*"
+sqlalchemy = "*"
+mysqlclient = "*"
+
+[requires]
+python_version = "3.8"
+
+[scripts]
+pfArgs = "python about.py"
+
+[pipenv]
+allow_prereleases = true
