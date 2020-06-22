@@ -271,11 +271,7 @@ sudo kill 80
 ・chown -R mysql:root /var/run/mysqld/;
 ・/entrypoint.sh mysqld --user=mysql --console'
 ```
-mounting \\\"/run/desktop/s/nuxt/d2/nginx/uwsgi_params\\\" to rootfs 
-\\\"/var/lib/docker/overlay2/75c4da340055da26e9/merged\\\" at 
-\\\"/var/lib/docker/overlay2/75c4da340055da26e9da3e4f955669d6a1fa24ddb489b7ms\\\" caused 
-\\\"not a directory\\\"\"": 
-unknown: Are you trying to mount a directory onted host path exists and is the expected type
+
 
 ##### Docker
 docker-compose run python django-admin.py startproject mysite .
