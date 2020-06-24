@@ -1,0 +1,14 @@
+# backend/requirements.txt
+# Django
+django
+# option
+djangorestframework
+django-filter
+django-cors-headers
+djangorestframework-simplejwt
+djoser
+
+# Extra
+gunicorn
+mysqlclient
+sqlalchemy

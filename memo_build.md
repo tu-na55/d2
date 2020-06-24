@@ -275,6 +275,13 @@ sudo kill 80
 
 ##### Docker
 docker-compose run python django-admin.py startproject mysite .
+
+```bash
+# まずはDockerfileだけで動かしてみる
+docker build . -t pipenv_sample
+docker run -it pipenv_sample
+```
+
 ```bash
 wsl_update_x64.msi
 Docker Desktop Installer.exe

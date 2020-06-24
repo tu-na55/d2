@@ -37,6 +37,29 @@ djoser = "*"
 django-cors-headers = "*"
 ```
 
+```py
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+django = "==3.0.6"
+djangorestframework = "==3.11.0"
+djangorestframework-simplejwt = "==4.4.0"
+djangorestframework-gis = "==0.15"
+django-cors-headers = "==3.2.1"
+django-environ = "==0.4.5"
+djoser = "==2.0.3"
+gunicorn = "==20.0.4"
+psycopg2-binary = "==2.8.5"
+
+[requires]
+python_version = "3.8.2"
+```
+
 ◎pytest
 
 pipenv install --dev pytest pytest-cov pytest-django
@@ -59,6 +82,7 @@ flake8: pycodestyle, pyflakes, mccabeの3つのLinterを統一的に扱うwrappe
 ◎django
 django djangorestframework django-filter django-cors-headers
 
+
 以下未確認
 django-extensions = "*"
 django-configurations = "*"
@@ -68,9 +92,16 @@ djoser djangorestframework_simplejwt
 <!-- djangorestframework-jwt -->
 
 
+◎ネットワーク
+gunicorn
+<!-- uwsgi -->
+
+
 ◎DB
 mysqlclient: driver
+
 psycopg2: postgre driver
+pysopg2とpsycopg2-binaryの違い。これはどうやって使い分けるのか。コンパイラや外部のライブラリ等を必要としないのがバイナリの方らしい。
 
 sqlalchemy: ORM。DBはSQLiteで構築し、ORMモジュールであるSQLAlchemyを使ってデータを操作します。
 
@@ -86,6 +117,9 @@ opencv-python pillow
 
 ◎機械学習
 torch torchvision
+
+◎地図
+djangorestframework-gis
 
 ___
 
@@ -120,7 +154,6 @@ $ pipenv install
 #02 プロジェクト直下
 $ export PIPENV_VENV_IN_PROJECT=1
 $ pipenv install 
-
 
 
 @VScode
@@ -201,7 +234,11 @@ source .venv/Scripts/activate
 # cd .venv/Scripts/ && deactivate
 
 echo $VIRTUAL_ENV
+# pipenv install
 pipenv install --python 3
+pipenv shell
+pip list
+
 pipenv --venv
 # 仮想環境削除
 # pipenv --rm
@@ -226,16 +263,36 @@ pipenv shell
 
 # which pythonは使わない？
 pipenv run python --version
-pipenv run python test_about.py
+pipenv run python sample_about.py
 
 # installed packagge-list
 pipenv graph
+# activateできてるなら下記でも表示できる
+pip list
 
 pipenv install numpy pandas
 pipenv install --dev flake8 black mypy
 # pipenv install --skip-lock [pkg]
 
-
+####################
+# pipfile
+[scripts]
+start = "python main.py runserver"
+test = "python -m unittest discover -v"
+format = "autopep8 -ivr ."
+lint = "flake8 --show-source ."
+####################
+# .env
+SECRET_KEY=<YOUR_SECRET_KEY>
+DATABASE_ENGINE=django.contrib.gis.db.backends.postgis
+DATABASE_DB=<YOUR_DB_NAME>
+DATABASE_USER=<YOUR_DB_USER>
+DATABASE_PASSWORD=<YOUR_DB_PASSWORD>
+#entrypoint.shで利用
+#compose.ymlに記載のサービス名で名前解決してくれる
+DATABASE_HOST=postgres
+DATABASE_PORT=xxxx
+DATABASE=postgres
 
 ####################
 # # venv + pip時代
