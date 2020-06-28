@@ -184,7 +184,6 @@ django
 ```
 
 
-
 ##### git
 
 ```bash
@@ -253,7 +252,7 @@ firewall-cmd --reload
 # ポートの使用状況
 lsof -i:80
 
-
+sudo netstat -tlpn
 netstat -nap
 netstat -na | grep ":80"
 # 占領箇所を特定したら、そのプロセスをkillする
@@ -274,7 +273,6 @@ sudo kill 80
 
 
 ##### Docker
-docker-compose run python django-admin.py startproject mysite .
 
 ```bash
 # まずはDockerfileだけで動かしてみる
@@ -285,6 +283,14 @@ docker run -it pipenv_sample
 ```bash
 wsl_update_x64.msi
 Docker Desktop Installer.exe
+
+# pull
+# curl -L https://github.com/docker/compose/releases/download/1.24.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose  
+# chmod +x /usr/local/bin/docker-compose 
+
+Proxy環境下でイメージを取得できないときは、
+ /usr/lib/systemd/system/docker.serviceに
+ Environment="HTTP_PROXY=http://{proxy_server}:{port}" を追記する。
 
 # 01
 git clone [url].git
@@ -303,6 +309,10 @@ docker-compose up
 docker ps
 
 docker exec -it [containerName] bash
+# OCI runtime exec failed -> bashの代わりにshで実行。
+docker exec -it [coniainerName: django] sh
+docker-compose exec [serviceName: backend] sh
+
 
 # version
 docker-compose exec db mysql -V
@@ -310,10 +320,46 @@ docker-compose exec db mysql -V
 # 動作確認するため、一度コンテナを削除します。
 docker-compose stop
 docker-compose rm
+# Going to remove django, mysql
+# Are you sure? [yN] y
+# Removing django ... done
+# Removing mysql  ... done
+
+# containerだけ削除したので、imagesは残ってる
+docker images
+# REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+# d2_backend          latest              37cc17751e6f        6 minutes ago       513MB
+# mysql               8.0                 be0dbf01a0f3        2 weeks ago         541MB
+# python              3.8-alpine          8ecf5a48c789        3 weeks ago         78.9MB
+
 # 検証用のDBなので、永続データも削除してしまいます。
-rm -fr .data/
+rm -fr mysql_data/
 docker-compose up -d
 ####################
+docker-compose up -d --build
+docker-compose exec -it mysql bash
+
+docker ps
+# CONTAINER ID        IMAGE             NAMES
+# 2c473ce41e0d        d2_backend        django
+# 7e3da13a4d3d        mysql:8.0         mysql
+
+docker images
+# REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+# d2_backend          latest              bdc3fbb2a487        24 minutes ago      513MB
+# mysql               8.0                 be0dbf01a0f3        2 weeks ago         541MB
+# python              3.8-alpine          8ecf5a48c789        3 weeks ago         78.9MB
+
+# DBが指定したもので作成されており、postgisも有効になっているのが確認できました。
+# 以下のコマンドで一旦コンテナを停止・イメージを削除しましょう。
+docker-compose down -v
+# Stopping django ... done
+# Stopping mysql  ... done
+# Removing django ... done
+# Removing mysql  ... done
+# Removing network d2_default
+# Removing volume d2_mysql_data
+
 # コンテナと名前付きボリュームの削除が行えます。
 $ docker-compose down --volumes
 $ docker-compose up -d
@@ -323,8 +369,42 @@ docker volume ls
 # 使用していないボリュームの索条
 docker volume prune
 ####################
+# log確認
+docker ps -a
+docker logs [container-id]
+
+
+grep "error_log" /etc/nginx/* -R && tail -n 100 /var/log/nginx/error.log
+####################
+docker-compose run python django-admin.py startproject mysite .
 sudo docker-compose run python django-admin.py startproject backend .
 
+####################
+# nginx
+docker-compose up -d --build
+docker-compose down -v
+# docker run --name nginx -d -p 80:80 nginx
+# docker run --name alpine_nginx -d -p 80:80 alpine_nginx
+
+# HTTPレスポンスヘッダで確認
+curl --verbose localhost/test1-server
+
+# docker-compose exec backend python manage.py migrate
+python manage.py runserver 0.0.0.0:8001
+gunicorn --workers=4 --bind=127.0.0.1:9000 my_project.wsgi:application
+
+####################
+docker exec -it backend sh | python -V
+```
+cron
+makefile
+
+#### postgre
+
+```bash
+docker exec -it postgres bash
+psql -U <YOUR_DB_USER> -d <YOUR_DB_NAME>
+SELECT postgis_version();
 ```
 
 #### mysql
@@ -385,6 +465,7 @@ SELECT Host, User, authentication_string FROM mysql.user;
 SELECT user, host, plugin FROM mysql.user;
 -- 認証方式変更
 ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'new_root_password';
+
 
 -- 文字コード
 show variables like '%char%';
