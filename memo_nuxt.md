@@ -77,6 +77,81 @@ ___
 @vue/test-utils
 babel-eslint browser-env
 nodemon
+
+
+// andys2018-depencies
+    "express": "^4.16.3",
+
+    "nuxt": "^2.12.2",
+    "nuxt-composition-api": "^0.5.0",
+    "@nuxtjs/pwa": "^2.6.0",
+
+    "@nuxtjs/feed": "^0.2.0",
+    "@nuxtjs/sitemap": "^0.1.1",
+    "@nuxtjs/google-analytics": "^2.0.2",
+
+    "@nuxtjs/sentry": "^2.0.0",
+    "@sentry/webpack-plugin": "^1.6.2",
+
+    "contentful": "^7.0.5",
+
+    "cross-env": "^5.2.0",
+    "dotenv": "^6.1.0",
+
+    "dayjs": "^1.7.7",
+    "marked": "^0.5.1",
+    "prismjs": "^1.15.0",
+    "vue-lazyload": "^1.2.6"
+
+// andys2018-dev
+    "@nuxt/typescript-build": "^0.6.6",
+    "babel-runtime": "^6.26.0",
+
+
+    "nodemon": "^1.18.7",
+    "npm-run-all": "^4.1.5",
+    "bundlewatch": "^0.2.5",
+
+
+    "typescript": "^3.8.3",
+    "ts-loader": "^7.0.3",
+    "@types/node": "^13.13.2",
+
+    "prettier": "1.14.3",
+    "prettier-stylelint": "^0.4.2",
+    "eslint-config-prettier": "^3.1.0",
+    "eslint-plugin-prettier": "2.6.2",
+
+
+    "jest": "^26.0.1",
+    "@types/jest": "^25.2.1",
+    "ts-jest": "^25.4.0",
+
+
+    "babel-eslint": "^8.2.1",
+    "eslint": "^5.0.1",
+    "eslint-config-typescript": "^1.1.0",
+    "eslint-plugin-typescript": "^0.13.0",
+    "typescript-eslint-parser": "^21.0.1"
+    "eslint-plugin-vue": "^4.0.0",
+
+
+
+
+    "stylelint": "^9.8.0",
+    "stylelint-config-rational-order": "^0.0.2",
+    "stylelint-config-recommended": "^2.1.0",
+
+    "fork-ts-checker-webpack-plugin": "^0.5.0",
+    "husky": "^1.1.4",
+    "lint-staged": "^8.0.5",
+
+    "lighthouse": "^5.6.0",
+
+    "@types/prismjs": "^1.9.0",
+    "@types/marked": "^0.4.2",
+
+
 ```
 
 
@@ -207,15 +282,18 @@ npm install -g n
 
 # ただしWINでは使えないので、Node.js公式からLTSをインストール。
 npm update npm
+# npm ls -g --depth=0
+
 npm install -g yarn
 # とりあえず全アップグレード
 yarn upgrade-interactive --latest
-
 
 yarn init -y
 yarn global add create-nuxt-app
 yarn create nuxt-app app
 # yarn create nuxt-app client ./client
+# yarn global list --depth=0
+
 
   To get started:
         cd app
@@ -256,12 +334,32 @@ cd client
 # yarn -s run [pkg]
 yarn -s run dev
 
+##########
+# 設定ファイルとsrcを分離
+mkdir src
+mv assets components layouts middleware pages plugins static store ./src
+
+# nuxt.config.jsに追加
+  srcDir: 'src',
+# webpack.config.js作成
+  '~': path.resolve(rootPath, '/src'),
+  '@': path.resolve(rootPath, '/src'),
+# jsconfig.jsonを修正
+  "~/*": ["./src/*"],
+  "@/*": ["./src/*"],
+# tsconfig.jsonを修正
+  "~/*": ["src/*"],
+  "@/*": ["src/*"]
+##########
+
+
 # 追加
 yarn add vuex nuxt-property-decorator
 # tsconfigの"experimentalDecorators": trueを確認
 
 yarn add @nuxtjs/vuetify -D
 # configのmodulesに追記
+
 
 # JWT認証
 @nuxtjs/auth
@@ -279,7 +377,12 @@ yarn -s run dev
 yarn run lint --fix
 ```
 
+```bash
+# jest
+yarn add -D jest ts-jest vue-jest @vue/test-utils @types/jest
+yarn add -D babel-jest babel-core babel-preset-env
 
+```
 
 
 
